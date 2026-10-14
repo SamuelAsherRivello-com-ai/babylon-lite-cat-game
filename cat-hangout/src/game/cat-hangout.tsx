@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { CatHangoutClient, type CatHangoutConnection, type ServerCat } from "./cat-hangout-client.ts";
+import { predictPosition, reconcilePosition } from "./network-sync.ts";
 import type { Cat, CatActivity } from "./room.ts";
 
 const WORLD_WIDTH = 640;
 const WORLD_HEIGHT = 360;
 const clamp = (value: number, minimum: number, maximum: number) => Math.max(minimum, Math.min(maximum, value));
+type Prediction = Readonly<{ id: string; x: number; z: number }>;
 
 export function CatHangout() {
   const [connection, setConnection] = useState<CatHangoutConnection>({ status: "connecting", snapshot: null, sessionId: null, error: "" });
+  const [prediction, setPrediction] = useState<Prediction | null>(null);
   const [paused, setPaused] = useState(false);
   const keys = useRef(new Set<string>());
   const touchInput = useRef({ x: 0, y: 0 });
@@ -21,6 +24,16 @@ export function CatHangout() {
     next.connect();
     return () => { unsubscribe(); next.disconnect(); };
   }, []);
+
+  useEffect(() => {
+    const authoritative = connection.snapshot?.cats.find((cat) => cat.id === connection.sessionId);
+    if (!authoritative) { setPrediction(null); return; }
+    setPrediction((current) => {
+      if (!current || current.id !== authoritative.id) return { id: authoritative.id, x: authoritative.x, z: authoritative.z };
+      const reconciled = reconcilePosition({ x: current.x, y: current.z }, { x: authoritative.x, y: authoritative.z }, 0.36);
+      return { id: current.id, x: reconciled.x, z: reconciled.y };
+    });
+  }, [connection.sessionId, connection.snapshot]);
 
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
@@ -39,7 +52,17 @@ export function CatHangout() {
       if (time - last > 210 && !paused) {
         const key = keys.current;
         const input = { x: (key.has("d") || key.has("arrowright") ? 1 : 0) - (key.has("a") || key.has("arrowleft") ? 1 : 0) + touchInput.current.x, y: (key.has("s") || key.has("arrowdown") ? 1 : 0) - (key.has("w") || key.has("arrowup") ? 1 : 0) + touchInput.current.y, interact: interaction.current };
-        if (input.x || input.y) client.current?.move(clamp(input.x, -1, 1), clamp(input.y, -1, 1));
+        if (input.x || input.y) {
+          const x = clamp(input.x, -1, 1); const z = clamp(input.y, -1, 1);
+          client.current?.move(x, z);
+          const local = connection.snapshot?.cats.find((cat) => cat.id === connection.sessionId);
+          setPrediction((current) => {
+            const baseline = current?.id === connection.sessionId ? current : local && { id: local.id, x: local.x, z: local.z };
+            if (!baseline) return current;
+            const next = predictPosition({ x: baseline.x, y: baseline.z }, { x, y: z }, 0.002);
+            return { id: baseline.id, x: next.x, z: next.y };
+          });
+        }
         if (input.interact) client.current?.interact();
         interaction.current = false;
         last = time;
@@ -47,9 +70,12 @@ export function CatHangout() {
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick); return () => cancelAnimationFrame(frame);
-  }, [paused]);
+  }, [connection.sessionId, connection.snapshot, paused]);
 
-  const cats = useMemo(() => (connection.snapshot?.cats ?? []).map(toDisplayCat), [connection.snapshot]);
+  const cats = useMemo(() => (connection.snapshot?.cats ?? []).map((cat) => {
+    const next = prediction?.id === cat.id ? { ...cat, x: prediction.x, z: prediction.z } : cat;
+    return toDisplayCat(next);
+  }), [connection.snapshot, prediction]);
   const roster = useMemo(() => [...cats].sort((a, b) => a.number - b.number), [cats]);
   const setStick = (event: PointerEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();

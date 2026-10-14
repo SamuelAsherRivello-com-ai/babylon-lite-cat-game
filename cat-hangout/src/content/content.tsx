@@ -1,16 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  addSpriteAnimation,
-  attachSpriteAnimationsToRenderer,
   createRenderTexture2D,
   createGridSpriteAtlas,
   createSprite2DLayer,
-  createSpriteAnimationManager,
-  createSpriteFrameAnimation,
   createSpriteRenderer,
   createEngine,
   disposeEngine,
-  disposeSpriteAnimationBinding,
   disposeSpriteAtlas,
   disposeSpriteRenderer,
   loadTexture2D,
@@ -20,8 +15,7 @@ import {
   startEngine,
   stopEngine,
 } from "@babylonjs/lite";
-import tileUrl from "./babylon/images/concentric-squares-32.png?url";
-import { contentConfig, getRenderingPolicy, logicalResolution, pixelPerfectOptions, showcaseTileSize } from "./babylon/config.ts";
+import { contentConfig, getRenderingPolicy, logicalResolution, pixelPerfectOptions } from "./babylon/config.ts";
 import { getInitializationMessage } from "./babylon/initialization.ts";
 import { getLogicalToRenderScale } from "./babylon/pixel-perfect.ts";
 import { BabylonLiteAIEntry, BabylonLiteMode } from "./babylon/pixel-grid-entry.ts";
@@ -29,6 +23,7 @@ import { createRenderTargetSurfaceView, getRenderResolutionDimensions } from "./
 import { useContentShell } from "../shared/content-shell-context.tsx";
 import { useBabylonPresentation } from "./babylon/babylon-presentation.tsx";
 import { CatHangout } from "../game/cat-hangout.tsx";
+import { validateCatHangoutMap, type TiledMap } from "../game/tiled-map.ts";
 
 // Lite 1.32 exposes this runtime limit through an internal device field omitted
 // from its public declaration. Keep that pinned boundary assertion in one place.
@@ -36,10 +31,11 @@ function getTextureDimensionLimit(engine: Awaited<ReturnType<typeof createEngine
   return (engine as typeof engine & { _device: { limits: { maxTextureDimension2D: number } } })._device.limits.maxTextureDimension2D;
 }
 
-const TAU = Math.PI * 2;
-const ROTATION_STEPS = 628;
-const ROTATION_STEP_MS = 50;
 const BACKGROUND = Object.freeze({ r: 1, g: 1, b: 1, a: 1 });
+const furnitureUrl = `${import.meta.env.BASE_URL}assets/catmega/furniture.png`;
+const mapUrl = `${import.meta.env.BASE_URL}maps/cat-hangout.tmj`;
+const TILE_SIZE = 32;
+const OBJECT_FRAMES: Readonly<Record<string, number>> = Object.freeze({ box: 4, rest: 21, food: 37, tree: 68, "human-spawn": 0, "bot-roam": 0 });
 
 function PixelPerfectShowcase() {
   const { paused } = useContentShell();
@@ -79,10 +75,10 @@ function PixelPerfectShowcase() {
     let renderSurface: Awaited<ReturnType<typeof createEngine>> | null = null;
     let renderer: ReturnType<typeof createSpriteRenderer> | null = null;
     let layer: ReturnType<typeof createSprite2DLayer> | null = null;
-    let sprite: ReturnType<typeof BabylonLiteAIEntry.addSprite> | null = null;
+    const worldSprites: ReturnType<typeof BabylonLiteAIEntry.addSprite>[] = [];
+    let tiledMap: TiledMap | null = null;
     let resizeObserver: ResizeObserver | null = null;
     let dprQuery: MediaQueryList | null = null;
-    let animationBinding: ReturnType<typeof attachSpriteAnimationsToRenderer> | null = null;
     let setupFinished = false;
     let failed = false;
 
@@ -96,7 +92,7 @@ function PixelPerfectShowcase() {
       dprQuery.addEventListener("change", handleDprChange, { once: true });
     };
     const updateRenderResolution = () => {
-      if (!engine || !renderer || !host || !canvas || !sprite || !layer) return;
+      if (!engine || !renderer || !host || !canvas || !layer || !tiledMap) return;
       const dpr = window.devicePixelRatio || 1;
       nativeWidth = Math.max(1, Math.floor(host.clientWidth * dpr));
       nativeHeight = Math.max(1, Math.floor(host.clientHeight * dpr));
@@ -161,14 +157,12 @@ function PixelPerfectShowcase() {
         });
       }
 
-      // The sprite stays at world origin (0, 0). Treat the Sprite2D layer view as
-      // the 2D camera: keep its focus at origin and scale the same logical bounds
-      // into each target size. Resolution changes therefore alter raster size,
-      // not the title's world position or camera framing.
+      // The view is the map camera. Simulation positions stay unsnapped; the
+      // approved entry point snaps only projected sprite anchors.
       BabylonLiteAIEntry.updateView(layer, {
         zoom: getLogicalToRenderScale(resolved.width, resolved.height, logicalResolution),
       });
-      BabylonLiteAIEntry.centerView(layer, 0, 0, resolved.width, resolved.height);
+      BabylonLiteAIEntry.centerView(layer, tiledMap.width * tiledMap.tilewidth / 2, tiledMap.height * tiledMap.tileheight / 2, resolved.width, resolved.height);
       setRenderScale(resolved.scale);
       setRenderResolutionInfo({
         preset: resolved.preset,
@@ -197,7 +191,6 @@ function PixelPerfectShowcase() {
     const disposeResources = () => {
       if (disposed || !setupFinished) return;
       disposed = true;
-      animationBinding && disposeSpriteAnimationBinding(animationBinding);
       if (renderer) setSpriteRendererTarget(renderer, null);
       if (presentationRenderer) disposeSpriteRenderer(presentationRenderer);
       if (renderer) disposeSpriteRenderer(renderer);
@@ -206,7 +199,6 @@ function PixelPerfectShowcase() {
       if (renderTexture) releaseTexture(renderTexture);
       if (texture) releaseTexture(texture);
       if (engine) disposeEngine(engine);
-      animationBinding = null;
       presentationRenderer = null;
       renderer = null;
       presentationAtlas = null;
@@ -235,7 +227,13 @@ function PixelPerfectShowcase() {
         engine = createdEngine;
         engineRef.current = engine;
 
-        const loadedTexture = await loadTexture2D(engine, tileUrl, pixelPerfectOptions.texture);
+        const mapResponse = await fetch(mapUrl);
+        if (!mapResponse.ok) throw new Error(`Unable to load Cat Hangout map (${mapResponse.status}).`);
+        const parsedMap: unknown = await mapResponse.json();
+        validateCatHangoutMap(parsedMap);
+        tiledMap = parsedMap;
+
+        const loadedTexture = await loadTexture2D(engine, furnitureUrl, pixelPerfectOptions.texture);
         if (cancelled) {
           texture = loadedTexture;
           setupFinished = true;
@@ -245,18 +243,33 @@ function PixelPerfectShowcase() {
         texture = loadedTexture;
 
         atlas = createGridSpriteAtlas(texture, {
-          cellWidthPx: showcaseTileSize,
-          cellHeightPx: showcaseTileSize,
-          columns: 1,
-          rows: 1,
+          cellWidthPx: TILE_SIZE,
+          cellHeightPx: TILE_SIZE,
+          columns: 16,
+          rows: 16,
           pivot: [0.5, 0.5],
         });
         layer = createSprite2DLayer(atlas, { pivot: [0.5, 0.5] });
-        sprite = BabylonLiteAIEntry.addSprite(layer, {
-          positionPx: [0, 0],
-          sizePx: [showcaseTileSize, showcaseTileSize],
-          frame: 0,
-        });
+        const ground = tiledMap.layers.find((candidate) => candidate.type === "tilelayer" && candidate.name === "Ground");
+        if (!ground?.data) throw new Error("Map requires a Ground tile layer.");
+        for (let row = 0; row < tiledMap.height; row += 1) {
+          for (let column = 0; column < tiledMap.width; column += 1) {
+            const index = row * tiledMap.width + column;
+            worldSprites.push(BabylonLiteAIEntry.addSprite(layer, {
+              positionPx: [column * TILE_SIZE + TILE_SIZE / 2, row * TILE_SIZE + TILE_SIZE / 2],
+              sizePx: [TILE_SIZE, TILE_SIZE],
+              frame: (ground.data[index] ?? 0) === 0 ? 0 : (ground.data[index] ?? 1) - 1,
+            }));
+          }
+        }
+        const activities = tiledMap.layers.find((candidate) => candidate.type === "objectgroup" && candidate.name === "Activities");
+        for (const activity of activities?.objects ?? []) {
+          worldSprites.push(BabylonLiteAIEntry.addSprite(layer, {
+            positionPx: [activity.x + TILE_SIZE / 2, activity.y + TILE_SIZE / 2],
+            sizePx: [TILE_SIZE, TILE_SIZE],
+            frame: OBJECT_FRAMES[activity.type] ?? 0,
+          }));
+        }
 
         const dpr = window.devicePixelRatio || 1;
         const initialWidth = Math.max(1, Math.floor(host.clientWidth * dpr));
@@ -275,14 +288,6 @@ function PixelPerfectShowcase() {
         });
         setSpriteRendererTarget(renderer, null);
         registerSpriteRenderer(renderer);
-
-        const animationManager = createSpriteAnimationManager();
-        addSpriteAnimation(animationManager, createSpriteFrameAnimation({
-          setFrame(step) {
-            if (!cancelled && sprite) BabylonLiteAIEntry.update(sprite, { rotation: (step / ROTATION_STEPS) * TAU });
-          },
-        }, 0, ROTATION_STEPS - 1, true, ROTATION_STEP_MS));
-        animationBinding = attachSpriteAnimationsToRenderer(renderer, animationManager);
 
         applyRenderResolutionRef.current = updateRenderResolutionSafely;
         updateRenderResolution();

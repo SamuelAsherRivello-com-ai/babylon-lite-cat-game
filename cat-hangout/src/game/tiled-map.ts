@@ -1,4 +1,4 @@
-export type TiledLayer = Readonly<{ name: string; type: "tilelayer" | "objectgroup"; data?: number[]; objects?: ReadonlyArray<{ name: string; type: string; x: number; y: number }> }>;
+export type TiledLayer = Readonly<{ name: string; type: "tilelayer" | "objectgroup"; data?: readonly number[]; objects?: ReadonlyArray<{ name: string; type: string; x: number; y: number }> }>;
 export type TiledMap = Readonly<{ type: "map"; orientation: "orthogonal"; width: number; height: number; tilewidth: number; tileheight: number; layers: readonly TiledLayer[] }>;
 
 export const requiredObjectTypes = ["human-spawn", "bot-roam", "box", "rest", "food", "tree"] as const;
@@ -17,4 +17,15 @@ export function validateCatHangoutMap(value: unknown): asserts value is TiledMap
   if (!activities?.objects) throw new Error("Map requires an Activities object layer.");
   const types = new Set(activities.objects.map((object) => object.type));
   for (const required of requiredObjectTypes) if (!types.has(required)) throw new Error(`Activities layer is missing ${required}.`);
+}
+
+/** Returns whether a map-space point is inside a walkable collision cell. */
+export function isCatHangoutMapWalkable(map: TiledMap, worldX: number, worldY: number): boolean {
+  validateCatHangoutMap(map);
+  if (!Number.isFinite(worldX) || !Number.isFinite(worldY)) return false;
+  const column = Math.floor(worldX / map.tilewidth);
+  const row = Math.floor(worldY / map.tileheight);
+  if (column < 0 || row < 0 || column >= map.width || row >= map.height) return false;
+  const collision = map.layers.find((layer) => layer.type === "tilelayer" && layer.name === "Collision");
+  return collision?.data?.[row * map.width + column] === 0;
 }

@@ -4,7 +4,7 @@ import { predictPosition, reconcilePosition } from "./network-sync.ts";
 import type { Cat, CatActivity } from "./room.ts";
 
 const WORLD_WIDTH = 640;
-const WORLD_HEIGHT = 360;
+const WORLD_HEIGHT = 384;
 const clamp = (value: number, minimum: number, maximum: number) => Math.max(minimum, Math.min(maximum, value));
 type Prediction = Readonly<{ id: string; x: number; z: number }>;
 
@@ -85,7 +85,6 @@ export function CatHangout() {
   return <section className="cat_hangout" aria-label="Cat Hangout game">
     <div className="cat_world" style={{ aspectRatio: `${WORLD_WIDTH}/${WORLD_HEIGHT}` }}>
       <div className="world_sign">Cat Hangout<br /><small>{connection.status === "connected" ? "Everyone is welcome" : "Joining the shared room…"}</small></div>
-      <div className="world_prop world_tree" aria-hidden="true" /><div className="world_prop world_box" aria-hidden="true" /><div className="world_prop world_food" aria-hidden="true" />
       {cats.map((cat) => <div className={`cat_sprite ${cat.kind} cat_${cat.activity}`} key={cat.id} style={{ left: `${(cat.x / WORLD_WIDTH) * 100}%`, top: `${(cat.y / WORLD_HEIGHT) * 100}%`, "--cat-color": cat.color } as CSSProperties}>
         <img src="assets/catmega/mochi-idle.png" alt="" /><span className="cat_label" style={{ backgroundColor: cat.color }}>{cat.number}. {cat.name}{cat.kind === "bot" ? " · bot" : ""}</span><span className="cat_activity">{cat.activity}</span>
       </div>)}

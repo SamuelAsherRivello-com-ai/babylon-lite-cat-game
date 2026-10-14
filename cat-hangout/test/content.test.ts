@@ -172,14 +172,16 @@ test('rejects Babylon Lite sprite mutations outside the pixel-grid entry module'
   }]), ['game/player.js']);
 });
 
-test('keeps the logical camera focus and spinning title at world origin across target sizes', async () => {
+test('centers the logical camera on the validated Tiled cat world across target sizes', async () => {
   assert.equal(getLogicalToRenderScale(160, 90), 0.5);
   assert.equal(getLogicalToRenderScale(320, 180), 1);
   assert.equal(getLogicalToRenderScale(640, 360), 2);
 
   const content = await readFile(new URL('../src/content/content.tsx', import.meta.url), 'utf8');
-  assert.match(content, /positionPx: \[0, 0\]/);
-  assert.match(content, /BabylonLiteAIEntry\.centerView\(layer, 0, 0, resolved\.width, resolved\.height\)/);
+  assert.match(content, /fetch\(mapUrl\)/);
+  assert.match(content, /validateCatHangoutMap\(parsedMap\)/);
+  assert.match(content, /BabylonLiteAIEntry\.addSprite\(layer/);
+  assert.match(content, /BabylonLiteAIEntry\.centerView\(layer, tiledMap\.width \* tiledMap\.tilewidth \/ 2, tiledMap\.height \* tiledMap\.tileheight \/ 2, resolved\.width, resolved\.height\)/);
   assert.match(content, /BabylonLiteAIEntry\.updateView\(layer,\s*\{\s*zoom: getLogicalToRenderScale/);
   assert.match(content, /setRenderScale\(resolved\.scale\)/);
 });
@@ -343,7 +345,6 @@ test('reports WebGPU-only initialization and allocation failures and uses the en
     /disposeSpriteRenderer\(renderer\)/,
     /releaseTexture\(texture\)/,
     /disposeEngine\(engine\)/,
-    /disposeSpriteAnimationBinding\(animationBinding\)/,
   ]) assert.match(content, expression);
   assert.match(content, /await createEngine\(canvas, pixelPerfectOptions\.engine\)/);
   assert.match(content, /queueMicrotask\(\(\) => \{\s*if \(!cancelled\) void setup\(\);\s*\}\)/);

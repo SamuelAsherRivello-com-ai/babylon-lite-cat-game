@@ -58,9 +58,12 @@
       "id": 3,
       "name": "Activities",
       "objects": [
-        { "height": 32, "id": 1, "name": "box", "rotation": 0, "type": "box", "visible": true, "width": 32, "x": 128, "y": 160 },
-        { "height": 32, "id": 2, "name": "food", "rotation": 0, "type": "food", "visible": true, "width": 32, "x": 448, "y": 128 },
-        { "height": 32, "id": 3, "name": "tree", "rotation": 0, "type": "tree", "visible": true, "width": 32, "x": 288, "y": 64 }
+        { "height": 32, "id": 1, "name": "human-spawn", "rotation": 0, "type": "human-spawn", "visible": true, "width": 32, "x": 96, "y": 256 },
+        { "height": 32, "id": 2, "name": "bot-roam", "rotation": 0, "type": "bot-roam", "visible": true, "width": 32, "x": 480, "y": 256 },
+        { "height": 32, "id": 3, "name": "box", "rotation": 0, "type": "box", "visible": true, "width": 32, "x": 128, "y": 160 },
+        { "height": 32, "id": 4, "name": "rest", "rotation": 0, "type": "rest", "visible": true, "width": 32, "x": 320, "y": 256 },
+        { "height": 32, "id": 5, "name": "food", "rotation": 0, "type": "food", "visible": true, "width": 32, "x": 448, "y": 128 },
+        { "height": 32, "id": 6, "name": "tree", "rotation": 0, "type": "tree", "visible": true, "width": 32, "x": 288, "y": 64 }
       ],
       "opacity": 1,
       "type": "objectgroup",
@@ -70,7 +73,7 @@
     }
   ],
   "nextlayerid": 4,
-  "nextobjectid": 4,
+  "nextobjectid": 7,
   "orientation": "orthogonal",
   "renderorder": "right-down",
   "tiledversion": "1.11.1",

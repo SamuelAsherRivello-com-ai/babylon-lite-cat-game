@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerE
 import { CatHangoutClient, type CatHangoutConnection, type ServerCat } from "./cat-hangout-client.ts";
 import { predictPosition, reconcilePosition } from "./network-sync.ts";
 import type { Cat, CatActivity } from "./room.ts";
+import { resolveCatMovement } from "./cat-input.ts";
 
 const WORLD_WIDTH = 640;
 const WORLD_HEIGHT = 384;
@@ -51,7 +52,8 @@ export function CatHangout() {
     const tick = (time: number) => {
       if (time - last > 210 && !paused) {
         const key = keys.current;
-        const input = { x: (key.has("d") || key.has("arrowright") ? 1 : 0) - (key.has("a") || key.has("arrowleft") ? 1 : 0) + touchInput.current.x, y: (key.has("s") || key.has("arrowdown") ? 1 : 0) - (key.has("w") || key.has("arrowup") ? 1 : 0) + touchInput.current.y, interact: interaction.current };
+        const movement = resolveCatMovement(key, touchInput.current);
+        const input = { ...movement, interact: interaction.current };
         if (input.x || input.y) {
           const x = clamp(input.x, -1, 1); const z = clamp(input.y, -1, 1);
           client.current?.move(x, z);
@@ -91,7 +93,8 @@ export function CatHangout() {
       {paused && <div className="pause_banner">Paused</div>}
       <button className="pause_button" type="button" onClick={() => setPaused((value) => !value)}>{paused ? "Resume" : "Pause"}</button>
       <aside className="cat_roster" aria-label="Players"><strong>Room · {roster.length} cats</strong>{roster.map((cat) => <span key={cat.id}><i style={{ backgroundColor: cat.color }} />{cat.number}. {cat.name}{cat.kind === "bot" ? " (bot)" : ""}</span>)}</aside>
-      {connection.error && <p className="connection_notice" role="status">{connection.error}</p>}
+      {connection.status !== "connected" && <p className="connection_notice" role="status">{connection.error || connection.status === "connecting" ? "Joining the shared room…" : connection.status}</p>}
+      {connection.status !== "connected" && <button className="retry_button" type="button" onClick={() => client.current?.retryNow()}>Retry</button>}
       <div className="touch_controls"><div className="virtual_stick" onPointerDown={setStick} onPointerMove={(event) => { if (event.buttons) setStick(event); }} onPointerUp={() => { touchInput.current = { x: 0, y: 0 }; }}><b>Move</b></div><button className="action_button" type="button" onPointerDown={() => { interaction.current = true; }}>Space<br />Play</button></div>
     </div>
   </section>;

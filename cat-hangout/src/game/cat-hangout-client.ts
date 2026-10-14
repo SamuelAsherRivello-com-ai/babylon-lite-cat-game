@@ -20,7 +20,7 @@ export type CatHangoutSnapshot = Readonly<{
 }>;
 
 export type CatHangoutConnection = Readonly<{
-  status: "connecting" | "connected" | "reconnecting" | "error";
+  status: "connecting" | "connected" | "reconnecting" | "full" | "expired" | "disconnected" | "error";
   snapshot: CatHangoutSnapshot | null;
   sessionId: string | null;
   error: string;
@@ -50,6 +50,12 @@ export class CatHangoutClient {
   subscribe(listener: Listener) { this.listeners.add(listener); listener(this.state); return () => this.listeners.delete(listener); }
 
   connect() { this.stopped = false; void this.join(); }
+
+  retryNow() {
+    this.stopped = false;
+    clearTimeout(this.retry);
+    void this.join();
+  }
 
   move(x: number, z: number) { if (this.state.status === "connected") this.room?.send("move", { x, z }); }
 
@@ -98,9 +104,18 @@ export class CatHangoutClient {
   private fail(generation: number, message: string) {
     if (this.stopped || generation !== this.generation) return;
     this.room = undefined;
-    this.setState({ ...this.state, status: "reconnecting", sessionId: null, error: message });
-    this.retry = setTimeout(() => void this.join(), 2_000);
+    const status = getRecoveryStatus(message);
+    this.setState({ ...this.state, status, sessionId: null, error: message });
+    if (status === "reconnecting" || status === "disconnected") this.retry = setTimeout(() => void this.join(), 2_000);
   }
+}
+
+export function getRecoveryStatus(message: string): Extract<CatHangoutConnection["status"], "full" | "expired" | "disconnected" | "reconnecting"> {
+  const normalized = message.toLowerCase();
+  if (normalized.includes("full") || normalized.includes("capacity")) return "full";
+  if (normalized.includes("expired") || normalized.includes("reservation")) return "expired";
+  if (normalized.includes("disconnect") || normalized.includes("interrupted")) return "disconnected";
+  return "reconnecting";
 }
 
 function readError(value: unknown) {

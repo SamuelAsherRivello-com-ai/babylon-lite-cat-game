@@ -15,7 +15,7 @@
 ## 3. Client game rules and rendering
 
 - [x] 3.1 Implement typed cat, activity, input, and bot state machines independent of rendering; verify unit tests cover human idle behavior and bot transitions.
-- [ ] 3.2 Replace the showcase with a pixel-perfect Babylon Lite Tiled world using only the approved entry-point sprite and camera APIs; verify WebGPU unsupported-state handling and map collision behavior.
+- [x] 3.2 Replace the showcase with a pixel-perfect Babylon Lite Tiled world using only the approved entry-point sprite and camera APIs; verify WebGPU unsupported-state handling and map collision behavior.
 - [x] 3.3 Add tilesheet animation definitions for walking, idle, sleep, and box activity; verify animation selection and frame timing tests pass.
 - [ ] 3.4 Add roster, labels, WASD/arrow input, Space action, virtual joystick, action button, pause, and connection-state UI; verify keyboard and touch tests pass.
 

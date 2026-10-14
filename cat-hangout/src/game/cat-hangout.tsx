@@ -3,6 +3,7 @@ import { CatHangoutClient, type CatHangoutConnection, type ServerCat } from "./c
 import { predictPosition, reconcilePosition } from "./network-sync.ts";
 import type { Cat, CatActivity } from "./room.ts";
 import { resolveCatMovement } from "./cat-input.ts";
+import { setCatCameraTarget } from "./cat-camera.ts";
 
 const WORLD_WIDTH = 640;
 const WORLD_HEIGHT = 384;
@@ -79,6 +80,11 @@ export function CatHangout() {
     return toDisplayCat(next);
   }), [connection.snapshot, prediction]);
   const roster = useMemo(() => [...cats].sort((a, b) => a.number - b.number), [cats]);
+  useEffect(() => {
+    const local = cats.find((cat) => cat.id === connection.sessionId);
+    setCatCameraTarget(local ? { x: local.x, y: local.y } : null);
+    return () => setCatCameraTarget(null);
+  }, [cats, connection.sessionId]);
   const setStick = (event: PointerEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     touchInput.current = { x: clamp((event.clientX - rect.left - rect.width / 2) / (rect.width / 2), -1, 1), y: clamp((event.clientY - rect.top - rect.height / 2) / (rect.height / 2), -1, 1) };

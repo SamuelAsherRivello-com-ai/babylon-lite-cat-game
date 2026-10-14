@@ -24,6 +24,7 @@ import { useContentShell } from "../shared/content-shell-context.tsx";
 import { useBabylonPresentation } from "./babylon/babylon-presentation.tsx";
 import { CatHangout } from "../game/cat-hangout.tsx";
 import { validateCatHangoutMap, type TiledMap } from "../game/tiled-map.ts";
+import { subscribeCatCameraTarget, type CatCameraTarget } from "../game/cat-camera.ts";
 
 // Lite 1.32 exposes this runtime limit through an internal device field omitted
 // from its public declaration. Keep that pinned boundary assertion in one place.
@@ -77,6 +78,8 @@ function PixelPerfectShowcase() {
     let layer: ReturnType<typeof createSprite2DLayer> | null = null;
     const worldSprites: ReturnType<typeof BabylonLiteAIEntry.addSprite>[] = [];
     let tiledMap: TiledMap | null = null;
+    let cameraTarget: CatCameraTarget | null = null;
+    let unsubscribeCamera = () => {};
     let resizeObserver: ResizeObserver | null = null;
     let dprQuery: MediaQueryList | null = null;
     let setupFinished = false;
@@ -162,7 +165,7 @@ function PixelPerfectShowcase() {
       BabylonLiteAIEntry.updateView(layer, {
         zoom: getLogicalToRenderScale(resolved.width, resolved.height, logicalResolution),
       });
-      BabylonLiteAIEntry.centerView(layer, tiledMap.width * tiledMap.tilewidth / 2, tiledMap.height * tiledMap.tileheight / 2, resolved.width, resolved.height);
+      BabylonLiteAIEntry.centerView(layer, cameraTarget?.x ?? tiledMap.width * tiledMap.tilewidth / 2, cameraTarget?.y ?? tiledMap.height * tiledMap.tileheight / 2, resolved.width, resolved.height);
       setRenderScale(resolved.scale);
       setRenderResolutionInfo({
         preset: resolved.preset,
@@ -290,6 +293,10 @@ function PixelPerfectShowcase() {
         registerSpriteRenderer(renderer);
 
         applyRenderResolutionRef.current = updateRenderResolutionSafely;
+        unsubscribeCamera = subscribeCatCameraTarget((next) => {
+          cameraTarget = next;
+          updateRenderResolutionSafely();
+        });
         updateRenderResolution();
 
         await startEngine(engine);
@@ -330,6 +337,7 @@ function PixelPerfectShowcase() {
       resizeObserver?.disconnect();
       window.removeEventListener("resize", updateRenderResolutionSafely);
       removeDprQuery();
+      unsubscribeCamera();
       applyRenderResolutionRef.current = null;
       disposeResources();
     };

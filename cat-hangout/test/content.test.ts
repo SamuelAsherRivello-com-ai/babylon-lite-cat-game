@@ -181,7 +181,8 @@ test('centers the logical camera on the validated Tiled cat world across target 
   assert.match(content, /fetch\(mapUrl\)/);
   assert.match(content, /validateCatHangoutMap\(parsedMap\)/);
   assert.match(content, /BabylonLiteAIEntry\.addSprite\(layer/);
-  assert.match(content, /BabylonLiteAIEntry\.centerView\(layer, tiledMap\.width \* tiledMap\.tilewidth \/ 2, tiledMap\.height \* tiledMap\.tileheight \/ 2, resolved\.width, resolved\.height\)/);
+  assert.match(content, /subscribeCatCameraTarget/);
+  assert.match(content, /BabylonLiteAIEntry\.centerView\(layer, cameraTarget\?\.x \?\? tiledMap\.width/);
   assert.match(content, /BabylonLiteAIEntry\.updateView\(layer,\s*\{\s*zoom: getLogicalToRenderScale/);
   assert.match(content, /setRenderScale\(resolved\.scale\)/);
 });

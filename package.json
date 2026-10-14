@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@babylonjs/lite": "1.32.0",
+    "@colyseus/sdk": "^0.17.43",
     "@vitejs/plugin-react": "^6.1.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"

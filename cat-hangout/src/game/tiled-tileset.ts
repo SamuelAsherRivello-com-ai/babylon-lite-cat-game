@@ -45,7 +45,8 @@ export function animationFrameAt(tileset: TiledTileset, tileId: number, elapsedM
 }
 
 export async function loadExternalTileset(mapUrl: string, source: string): Promise<TiledTileset> {
-  const url = new URL(source, mapUrl).toString();
+  const mapLocation = new URL(mapUrl, window.location.href);
+  const url = new URL(source, mapLocation).toString();
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Unable to load TSX ${source} (${response.status}).`);
   return parseExternalTileset(source, await response.text());

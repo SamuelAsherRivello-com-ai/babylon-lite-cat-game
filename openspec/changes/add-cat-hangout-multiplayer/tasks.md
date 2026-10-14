@@ -10,18 +10,19 @@
 
 - [x] 2.1 Add the Cat Hangout room registration, 12-human capacity, identity generation, and bot occupancy to the Colyseus server; verify server unit tests cover one, four, and twelve human populations.
 - [x] 2.2 Add authoritative movement-bound and interaction validation with typed room state; verify invalid client actions are rejected or corrected.
-- [ ] 2.3 Release and deploy the server through its existing workflow, run its sustained-session probe, and record the verified client package version and endpoint.
+- [x] 2.3 Release and deploy the server through its existing workflow, run its sustained-session probe, and record the verified client package version and endpoint.
 
 ## 3. Client game rules and rendering
 
 - [x] 3.1 Implement typed cat, activity, input, and bot state machines independent of rendering; verify unit tests cover human idle behavior and bot transitions.
 - [x] 3.2 Replace the showcase with a pixel-perfect Babylon Lite Tiled world using only the approved entry-point sprite and camera APIs; verify WebGPU unsupported-state handling and map collision behavior.
-- [x] 3.3 Add tilesheet animation definitions for walking, idle, sleep, and box activity; verify animation selection and frame timing tests pass.
+- [x] 3.3 Replace the initial tilesheet definitions with the dungeon-derived typed animation playback system, including CatMega state/frame selection and frame-timing tests.
+- [x] 3.5 Add typed external TSX tileset resolution, validation, and animated-tile frame selection; verify Tiled-relative path and malformed-reference tests pass.
 - [x] 3.4 Add roster, labels, WASD/arrow input, Space action, virtual joystick, action button, pause, and connection-state UI; verify keyboard and touch tests pass.
 
 ## 4. Synchronization and recovery
 
-- [ ] 4.1 Integrate the released shared client with local prediction, reconciliation, remote interpolation, and camera tracking; verify deterministic client rule and interpolation tests pass.
+- [x] 4.1 Integrate the released shared client with local prediction, reconciliation, remote interpolation, and camera tracking; verify deterministic client rule and interpolation tests pass.
 - [ ] 4.2 Implement join, full, disconnect, expired-room, and retry behavior without offline substitution; verify simulated connection-loss and reconnect tests pass.
 - [ ] 4.3 Test two independent clients under simulated latency and jitter; verify responsive local movement, smooth remote motion, stable bot population, and consistent interactions.
 

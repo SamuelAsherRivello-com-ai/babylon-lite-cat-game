@@ -26,3 +26,14 @@ The system SHALL use project-local copies of approved CatMegaFree art and docume
 #### Scenario: Built game is loaded
 - **WHEN** the published game loads its map or sprites
 - **THEN** it does not read files from the original external asset folder
+
+### Requirement: External tileset and animation contract
+The system SHALL resolve project-local external TSX tilesets referenced by the map, validate their tile geometry and animated frame references, and drive CatMega character frames through a typed runtime animation catalog.
+
+#### Scenario: Animated external tileset resolves
+- **WHEN** a valid map references a TSX with animated tiles
+- **THEN** the loader resolves the TSX relative to the map and selects the expected tile frame for elapsed time
+
+#### Scenario: Packed character sheet is animated
+- **WHEN** a cat changes between idle, walk, sleep, or box activity
+- **THEN** its state selects a catalogued source rectangle and advances frames at the catalogued cadence without relying on a renderer position

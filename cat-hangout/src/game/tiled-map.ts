@@ -1,5 +1,5 @@
 export type TiledLayer = Readonly<{ name: string; type: "tilelayer" | "objectgroup"; data?: readonly number[]; objects?: ReadonlyArray<{ name: string; type: string; x: number; y: number }> }>;
-export type TiledMap = Readonly<{ type: "map"; orientation: "orthogonal"; width: number; height: number; tilewidth: number; tileheight: number; layers: readonly TiledLayer[] }>;
+export type TiledMap = Readonly<{ type: "map"; orientation: "orthogonal"; width: number; height: number; tilewidth: number; tileheight: number; layers: readonly TiledLayer[]; tilesets?: readonly Readonly<{ firstgid: number; source?: string }>[] }>;
 
 export const requiredObjectTypes = ["human-spawn", "bot-roam", "box", "rest", "food", "tree"] as const;
 
@@ -11,6 +11,9 @@ export function validateCatHangoutMap(value: unknown): asserts value is TiledMap
   if (typeof map.tilewidth !== "number" || typeof map.tileheight !== "number" || !Number.isInteger(map.tilewidth) || !Number.isInteger(map.tileheight) || map.tilewidth < 1 || map.tileheight < 1) throw new Error("Map tile dimensions must be positive integers.");
   const { width, height } = map;
   const layers = map.layers ?? [];
+  for (const tileset of map.tilesets ?? []) {
+    if (!Number.isInteger(tileset.firstgid) || tileset.firstgid < 1 || (tileset.source !== undefined && !tileset.source.endsWith(".tsx"))) throw new Error("Map tilesets must use valid TSX sources.");
+  }
   const collision = layers.find((layer) => layer.type === "tilelayer" && layer.name === "Collision");
   if (!collision?.data || collision.data.length !== width * height) throw new Error("Map requires a Collision tile layer matching map dimensions.");
   const activities = layers.find((layer) => layer.type === "objectgroup" && layer.name === "Activities");

@@ -25,8 +25,11 @@ const candidates = execFileSync("git", ["ls-files", "--cached", "--others", "--e
 // Generated output and dependencies are never authoring roots. No first-party
 // source, tests or tools are exempt. There are no external JS fixtures here.
 const generated = /(?:^|\/)(?:node_modules|dist|\.git|coverage|playwright-report|test-results)\//;
+// Tiled external tilesets conventionally use the .tsx extension despite being
+// XML assets, not React/TypeScript sources.
+const tiledXmlAsset = /^cat-hangout\/public\/tilesets\/.*\.tsx$/;
 for (const name of new Set(candidates)) {
-  if (!name || !existsSync(resolve(root, name)) || generated.test(name)) continue;
+  if (!name || !existsSync(resolve(root, name)) || generated.test(name) || tiledXmlAsset.test(name)) continue;
   if (/\.(?:js|jsx|mjs|cjs)$/.test(name)) failures.push(`Authored JavaScript: ${name}`);
   if (/\.(?:ts|tsx|mts|cts)$/.test(name) && !covered.has(normalize(name))) failures.push(`TypeScript outside compiler coverage: ${name}`);
 }

@@ -20,3 +20,11 @@ layer and activity objects are validated by `tiled-map.ts` and covered by the
 shipped-map test. Cat animation state is likewise explicit: humans select
 idles when no input is held, while bots choose wandering and activity states
 on the server.
+
+## Verified multiplayer release
+
+The game uses the released `v0.9.15` shared multiplayer server at
+`https://rmc-colyseus-multiplayer-server.vercel.app`. On 2026-10-14 UTC,
+the server's `GET /api/health` endpoint returned HTTP 200, version `0.9.15`,
+and the `cat-hangout` game registration after its sustained-session release
+probe completed successfully.

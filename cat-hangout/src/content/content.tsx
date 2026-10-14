@@ -24,6 +24,7 @@ import { useContentShell } from "../shared/content-shell-context.tsx";
 import { useBabylonPresentation } from "./babylon/babylon-presentation.tsx";
 import { CatHangout } from "../game/cat-hangout.tsx";
 import { validateCatHangoutMap, type TiledMap } from "../game/tiled-map.ts";
+import { animationFrameAt, loadExternalTileset, type TiledTileset } from "../game/tiled-tileset.ts";
 import { subscribeCatCameraTarget, type CatCameraTarget } from "../game/cat-camera.ts";
 
 // Lite 1.32 exposes this runtime limit through an internal device field omitted
@@ -78,6 +79,10 @@ function PixelPerfectShowcase() {
     let layer: ReturnType<typeof createSprite2DLayer> | null = null;
     const worldSprites: ReturnType<typeof BabylonLiteAIEntry.addSprite>[] = [];
     let tiledMap: TiledMap | null = null;
+    let tileset: TiledTileset | null = null;
+    let animationFrame = 0;
+    let animationStart = 0;
+    const animatedTiles: Array<{ sprite: ReturnType<typeof BabylonLiteAIEntry.addSprite>; tileId: number }> = [];
     let cameraTarget: CatCameraTarget | null = null;
     let unsubscribeCamera = () => {};
     let resizeObserver: ResizeObserver | null = null;
@@ -235,6 +240,12 @@ function PixelPerfectShowcase() {
         const parsedMap: unknown = await mapResponse.json();
         validateCatHangoutMap(parsedMap);
         tiledMap = parsedMap;
+        const externalTileset = tiledMap.tilesets?.find((candidate) => candidate.source)?.source;
+        if (!externalTileset) throw new Error("Map requires an external TSX tileset.");
+        tileset = await loadExternalTileset(mapUrl, externalTileset);
+        if (tileset.tileWidth !== TILE_SIZE || tileset.tileHeight !== TILE_SIZE || tileset.columns !== 16) {
+          throw new Error("Cat Hangout TSX must describe the 32px, 16-column furniture atlas.");
+        }
 
         const loadedTexture = await loadTexture2D(engine, furnitureUrl, pixelPerfectOptions.texture);
         if (cancelled) {
@@ -258,11 +269,14 @@ function PixelPerfectShowcase() {
         for (let row = 0; row < tiledMap.height; row += 1) {
           for (let column = 0; column < tiledMap.width; column += 1) {
             const index = row * tiledMap.width + column;
-            worldSprites.push(BabylonLiteAIEntry.addSprite(layer, {
+            const tileId = (ground.data[index] ?? 0) === 0 ? 0 : (ground.data[index] ?? 1) - 1;
+            const sprite = BabylonLiteAIEntry.addSprite(layer, {
               positionPx: [column * TILE_SIZE + TILE_SIZE / 2, row * TILE_SIZE + TILE_SIZE / 2],
               sizePx: [TILE_SIZE, TILE_SIZE],
-              frame: (ground.data[index] ?? 0) === 0 ? 0 : (ground.data[index] ?? 1) - 1,
-            }));
+              frame: tileId,
+            });
+            worldSprites.push(sprite);
+            if (tileset.animations.has(tileId)) animatedTiles.push({ sprite, tileId });
           }
         }
         const activities = tiledMap.layers.find((candidate) => candidate.type === "objectgroup" && candidate.name === "Activities");
@@ -315,6 +329,15 @@ function PixelPerfectShowcase() {
         resizeObserver.observe(host);
         window.addEventListener("resize", updateRenderResolutionSafely);
         observeDpr();
+        animationStart = performance.now();
+        const animateTiles = (now: number) => {
+          if (cancelled) return;
+          if (!processingPausedRef.current && tileset) {
+            for (const tile of animatedTiles) BabylonLiteAIEntry.update(tile.sprite, { frame: animationFrameAt(tileset, tile.tileId, now - animationStart) });
+          }
+          animationFrame = requestAnimationFrame(animateTiles);
+        };
+        animationFrame = requestAnimationFrame(animateTiles);
         if (!cancelled) setMessage("");
       } catch (error) {
         failed = true;
@@ -334,6 +357,7 @@ function PixelPerfectShowcase() {
     });
     return () => {
       cancelled = true;
+      cancelAnimationFrame(animationFrame);
       resizeObserver?.disconnect();
       window.removeEventListener("resize", updateRenderResolutionSafely);
       removeDprQuery();

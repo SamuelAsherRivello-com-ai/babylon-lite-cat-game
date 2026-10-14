@@ -79,6 +79,7 @@
   "tiledversion": "1.11.1",
   "tileheight": 32,
   "tilewidth": 32,
+  "tilesets": [{ "firstgid": 1, "source": "../tilesets/cat-furniture.tsx" }],
   "type": "map",
   "version": "1.10",
   "width": 20

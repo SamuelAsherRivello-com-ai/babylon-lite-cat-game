@@ -4,6 +4,7 @@ import { predictPosition, reconcilePosition } from "./network-sync.ts";
 import type { Cat, CatActivity } from "./room.ts";
 import { resolveCatMovement } from "./cat-input.ts";
 import { setCatCameraTarget } from "./cat-camera.ts";
+import { animationForActivity, frameAt } from "./cat-animation.ts";
 
 const WORLD_WIDTH = 640;
 const WORLD_HEIGHT = 384;
@@ -14,6 +15,7 @@ export function CatHangout() {
   const [connection, setConnection] = useState<CatHangoutConnection>({ status: "connecting", snapshot: null, sessionId: null, error: "" });
   const [prediction, setPrediction] = useState<Prediction | null>(null);
   const [paused, setPaused] = useState(false);
+  const [animationClock, setAnimationClock] = useState(0);
   const keys = useRef(new Set<string>());
   const touchInput = useRef({ x: 0, y: 0 });
   const interaction = useRef(false);
@@ -26,6 +28,11 @@ export function CatHangout() {
     next.connect();
     return () => { unsubscribe(); next.disconnect(); };
   }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => { if (!paused) setAnimationClock(performance.now()); }, 80);
+    return () => window.clearInterval(timer);
+  }, [paused]);
 
   useEffect(() => {
     const authoritative = connection.snapshot?.cats.find((cat) => cat.id === connection.sessionId);
@@ -94,7 +101,7 @@ export function CatHangout() {
     <div className="cat_world" style={{ aspectRatio: `${WORLD_WIDTH}/${WORLD_HEIGHT}` }}>
       <div className="world_sign">Cat Hangout<br /><small>{connection.status === "connected" ? "Everyone is welcome" : "Joining the shared room…"}</small></div>
       {cats.map((cat) => <div className={`cat_sprite ${cat.kind} cat_${cat.activity}`} key={cat.id} style={{ left: `${(cat.x / WORLD_WIDTH) * 100}%`, top: `${(cat.y / WORLD_HEIGHT) * 100}%`, "--cat-color": cat.color } as CSSProperties}>
-        <img src="assets/catmega/mochi-idle.png" alt="" /><span className="cat_label" style={{ backgroundColor: cat.color }}>{cat.number}. {cat.name}{cat.kind === "bot" ? " · bot" : ""}</span><span className="cat_activity">{cat.activity}</span>
+        <span className="cat_sheet"><img src="assets/catmega/mochi-idle.png" alt="" style={{ transform: `translateX(${-32 * frameAt(animationForActivity(cat.activity), animationClock)}px)` }} /></span><span className="cat_label" style={{ backgroundColor: cat.color }}>{cat.number}. {cat.name}{cat.kind === "bot" ? " · bot" : ""}</span><span className="cat_activity">{cat.activity}</span>
       </div>)}
       {paused && <div className="pause_banner">Paused</div>}
       <button className="pause_button" type="button" onClick={() => setPaused((value) => !value)}>{paused ? "Resume" : "Pause"}</button>

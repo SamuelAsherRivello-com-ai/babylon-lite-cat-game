@@ -34,6 +34,10 @@ The game reads an orthogonal map with named layers and objects for collisions, s
 
 Local copies of the provided CatMegaFree sheets feed a typed animation catalog. Cat state chooses directional walk, idle, sleep, or box frames. The existing dungeon Tiled and sprite-sheet systems provide reference behavior but are adapted to remove dungeon data and assumptions.
 
+### External tilesets and runtime animation playback
+
+The map may reference project-local external TSX tilesets. A typed loader resolves each tileset relative to the map, validates tile geometry and embedded animation frame references, and exposes frame timing without trusting renderer state. Pochi remains a packed character sheet because image inspection did not establish a regular tile grid; its catalog uses explicit source rectangles. Furniture may be used through an external TSX only after its grid contract is authored and validated in Tiled.
+
 ### Human and bot state separation
 
 Human cats enter movement states only from input and select only stationary idles when inactive. Bots run a timed state machine of choose activity, path to a valid destination, perform activity, and cool down. This prevents bots from taking control of human cats.

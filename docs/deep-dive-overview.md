@@ -1,3 +1,22 @@
-# Deep Dive Overview
+# Cat Hangout technical overview
 
-<!-- AI: This is where you want to have one page about the technical details of the project for a developer audience to get a high-level overview of the key three classes and contracts. -->
+`CatHangoutClient` is the browser boundary for the public `cat-hangout`
+Colyseus room. It requests a seat automatically, consumes the reservation,
+subscribes to authoritative snapshots, and retries after an interrupted
+connection. It deliberately does not create an offline substitute room.
+
+The server's `CatHangoutRoom` is authoritative for the twelve-human capacity,
+the bot-fill rule, movement validation, interactions, bot activity state, and
+the roster snapshot. A room has zero to twelve human cats; while it has fewer
+than four, it adds only enough bots to make four total cats, up to three bots.
+
+`network-sync.ts` keeps local input responsive without treating a client
+prediction as authority. The local cat predicts normalized movement, then
+reconciles toward the room snapshot; remote cats are interpolated between
+snapshots. The player list always comes from the latest authoritative roster.
+
+The editable map is `cat-hangout/public/maps/cat-hangout.tmj`. Its collision
+layer and activity objects are validated by `tiled-map.ts` and covered by the
+shipped-map test. Cat animation state is likewise explicit: humans select
+idles when no input is held, while bots choose wandering and activity states
+on the server.

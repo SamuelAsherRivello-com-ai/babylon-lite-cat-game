@@ -88,7 +88,7 @@ Install dependencies, then start the Vite development server from the repository
 <!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
 
 <!-- AI: Update these project details when the template is used. -->
-This is the project details...
+The browser client joins the public `cat-hangout` Colyseus room immediately, renders a landscape pixel-art hangout, and keeps bots server-authoritative while fewer than four humans are present.
 
 ### 🤖 AI
 
@@ -102,7 +102,11 @@ This is the project details...
 <!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
 
 - [Deep Dive Overview](docs/deep-dive-overview.md) summarizes the project's
-  technical details for developers.
+  technical details for developers, including its shared-room and prediction model.
+- [Tiled map guide](docs/tiled-map.md) explains the editable world, collision,
+  and activity-object contract.
+- [Asset provenance](docs/asset-provenance.md) records the CatMega source
+  material and its current licensing evidence.
 
 ### 📦 Packages
 

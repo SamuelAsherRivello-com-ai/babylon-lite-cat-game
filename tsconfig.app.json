@@ -15,7 +15,7 @@
     ]
   },
   "include": [
-    "project-name/src/**/*.ts",
-    "project-name/src/**/*.tsx"
+    "cat-hangout/src/**/*.ts",
+    "cat-hangout/src/**/*.tsx"
   ]
 }

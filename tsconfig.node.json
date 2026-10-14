@@ -17,7 +17,7 @@
   "include": [
     "vite.config.ts",
     "scripts/**/*.ts",
-    "project-name/test/**/*.ts",
-    "project-name/test/**/*.tsx"
+    "cat-hangout/test/**/*.ts",
+    "cat-hangout/test/**/*.tsx"
   ]
 }

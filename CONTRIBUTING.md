@@ -6,7 +6,7 @@ Thank you for improving this project.
 
 Review `README.md`, `AGENTS.md`, and the project's actual configuration first.
 For the baseline, the repository root holds the npm dependencies and project
-commands; application files live in `project-name/`. Keep repository metadata
+commands; application files live in `cat-hangout/`. Keep repository metadata
 at the root.
 
 For a substantial feature or behavior change that requires OpenSpec, use the

@@ -1,22 +1,21 @@
-<!-- AI: Keep commands rooted at the repository. The Vite application, source, tests, and build output belong in project-name/. Work within the following HTML template -->
+<!-- AI: Keep commands rooted at the repository. The Vite application, source, tests, and build output belong in cat-hangout/. -->
 <a href="docs/samuel-asher-rivello-banner.png"><img src="docs/samuel-asher-rivello-banner.png" width="640" alt="Banner" /></a>
 <BR>
 
 [![Babylon Lite](https://img.shields.io/badge/Babylon_Lite-WebGPU-4B6EAF?logo=webgpu&logoColor=white)](https://www.npmjs.com/package/@babylonjs/lite)
-[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/SamuelAsherRivello/github-repository-template/deploy-pages.yml?label=GitHub%20Actions)](https://github.com/SamuelAsherRivello/github-repository-template/actions)
+[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/SamuelAsherRivello-com-ai/babylon-lite-cat-game/deploy-pages.yml?label=GitHub%20Actions)](https://github.com/SamuelAsherRivello-com-ai/babylon-lite-cat-game/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![Template](https://img.shields.io/badge/GitHub-Template-181717?logo=github)](https://github.com/SamuelAsherRivello/github-repository-template/generate)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![WebGPU](https://img.shields.io/badge/WebGPU-required-005A9C?logo=webgpu&logoColor=white)](https://www.w3.org/TR/webgpu/)
 
-# {project-name}
+# Cat Hangout
 
 <!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
 
 <!-- AI: Update this project summary when the template is used. -->
-This is the project repo....
+Cat Hangout is a relaxed, shared 2D cat playground for up to twelve people, with friendly bots filling an otherwise quiet room to four cats.
 
 ## Original AI Prompt
 
@@ -27,16 +26,7 @@ This is the project repo....
 
 ```text
 
-Create a new project from this template.
-
-Type: {App | Game}
-Orientation: {Portrait | Landscape}
-
-Project description:
-{Describe the app or game, including its core purpose and important features.}
-
-For games:
-Rendering: {2D Pixel Perfect | 3D}
+Create a landscape, pixel-perfect Babylon Lite multiplayer 2D cat hangout game. Visitors join one shared room automatically; up to 12 humans can play, while bots fill the room to four cats when fewer than four people are present. Cats walk using WASD, arrow keys, or the onscreen joystick, and use Space/the action button to interact. There is no win or lose condition.
 
 ```
 
@@ -46,7 +36,7 @@ Rendering: {2D Pixel Perfect | 3D}
 
 <!-- AI: Keep exactly one bullet containing the demo link and no other visible text. Do not mention releases or add other text here. Keep this one link updated to the latest release URL. -->
 
-- [{live-demo-url}](https://samuelasherrivello.github.io/github-repository-template/)
+- [Cat Hangout development site](https://samuelasherrivello-com-ai.github.io/babylon-lite-cat-game/)
 
 
 ## Images
@@ -69,7 +59,7 @@ Rendering: {2D Pixel Perfect | 3D}
 <!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
 
 <!-- AI: Update this getting-started summary when the template is used. -->
-This is the getting started...
+Install dependencies, then start the Vite development server from the repository root.
 
 ### 🛠 Build Project
 
@@ -125,9 +115,9 @@ This is the project details...
 <!-- AI: Keep this section to exactly four bullet points. -->
 
 - `docs/` contains canonical README images and project documentation assets.
-- `project-name/src/content/` contains the app or game's primary content layer.
-- `project-name/src/shared/` contains shared utilities and cross-cutting code.
-- `project-name/src/ui/` contains the React UI and HUD composition.
+- `cat-hangout/src/content/` contains the Babylon Lite game surface.
+- `cat-hangout/src/game/` contains cat rules, Tiled validation, and animation contracts.
+- `cat-hangout/src/shared/` contains shared utilities and cross-cutting code.
 
 ## Credits
 

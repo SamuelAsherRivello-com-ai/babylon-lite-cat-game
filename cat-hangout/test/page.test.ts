@@ -11,8 +11,8 @@ import { defaultLayout, fitViewport, validateLayout } from '../src/ui/layout.ts'
 import { projectConfigStorageKey, readProjectConfig, writeProjectConfigPatch } from '../src/shared/project-config-storage.ts';
 
 test('keeps npm/application and GitHub Pages roots', () => {
-  assert.equal(viteConfig.root, 'project-name');
-  assert.equal(viteConfig.base, '/github-repository-template/');
+  assert.equal(viteConfig.root, 'cat-hangout');
+  assert.equal(viteConfig.base, '/babylon-lite-cat-game/');
 });
 test('fits orientations and project-defined ratios in CSS pixels', () => {
   for (const layout of ([defaultLayout, {orientation:'portrait',width:9,height:16}, {orientation:'square',width:1,height:1}, {orientation:'landscape',width:7,height:3}] satisfies Layout[])) {
@@ -65,7 +65,7 @@ test('preserves corner contracts and engine-neutral content-layer guidance', asy
   for (const position of ['top_left','top_right','bottom_left','bottom_right']) assert.ok(app.includes('<Corner position="'+position+'">'));
   assert.match(app,/versionText.*trim/);
   assert.match(app,/noopener noreferrer/);
-  assert.match(app,/github-repository-template.fullscreen/);
+  assert.match(app,/babylon-lite-cat-game.fullscreen/);
   assert.match(surface,/Selected content mounts beneath the independent UI layer/);
   assert.doesNotMatch(surface,/Babylon Lite content mounts here|future Babylon Lite integration/i);
   for (const term of ['Logical resolution','Internal render resolution','Canvas backing resolution','Display size','CSS size','fractional','StrictMode']) assert.ok(guide.includes(term));

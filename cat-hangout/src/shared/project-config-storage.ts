@@ -1,6 +1,6 @@
 export type ConfigStorage = Pick<Storage, "getItem" | "setItem">;
 
-export const projectConfigStorageKey = "github-repository-template.config";
+export const projectConfigStorageKey = "babylon-lite-cat-game.config";
 
 export function readProjectConfig(storage: Pick<Storage, "getItem">): Record<string, unknown> {
   try {

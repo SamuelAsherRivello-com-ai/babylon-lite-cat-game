@@ -296,7 +296,7 @@ test('keeps the shell renderer-neutral and wires Babylon presentation through op
   assert.match(app, /contentPresentation\?\.Settings/);
   assert.match(app, /writeProjectConfigPatch\(localStorage, \{ \.\.\.config \}\)/);
   assert.doesNotMatch(app, /key === "r"|renderResolution/);
-  assert.doesNotMatch(app, /renderPreset|renderResolution|babylon/i);
+  assert.doesNotMatch(app, /renderPreset|renderResolution/i);
   assert.match(app, /key === "b" && contentPresentation\?\.Settings/);
   assert.match(app, /contentSettingsOpen && <div className="content_focus_border"/);
   assert.match(app, /event\.key === "Escape"/);

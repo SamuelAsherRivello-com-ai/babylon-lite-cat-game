@@ -3,19 +3,19 @@ import type { Layout } from "./layout.ts";
 import type { Gutters } from "./browser-surface.tsx";
 export interface ReadoutProps { hudVisible: boolean; viewportPixels: { width: number; height: number }; devicePixelRatio: number; openSettings: () => void }
 interface ContentPresentation { title?: string; Readout?: ComponentType<ReadoutProps>; Settings?: ComponentType }
-interface AppConfig { fullscreen: boolean; orientation: "portrait" | "landscape" | null; hudVisible: boolean }
+interface AppConfig { fullscreen: boolean; hudVisible: boolean }
 
 import { useCallback, useEffect, useState } from "react";
 import versionText from "../../../version.txt?raw";
 import { ContentShellProvider } from "../shared/content-shell-context.tsx";
 import { readProjectConfig, writeProjectConfigPatch } from "../shared/project-config-storage.ts";
 import { BrowserSurface } from "./browser-surface.tsx";
-import { aspectRatioPresets, defaultLayout } from "./layout.ts";
+import { defaultLayout } from "./layout.ts";
 import { Dialog } from "./dialog.tsx";
 
-const fullscreenStorageKey = "github-repository-template.fullscreen";
-const defaultConfig = Object.freeze({ fullscreen: false, orientation: null, hudVisible: true });
-const repositoryUrl = "https://github.com/SamuelAsherRivello/github-repository-template";
+const fullscreenStorageKey = "babylon-lite-cat-game.fullscreen";
+const defaultConfig = Object.freeze({ fullscreen: false, hudVisible: true });
+const repositoryUrl = "https://github.com/SamuelAsherRivello-com-ai/babylon-lite-cat-game";
 
 function readConfig(): AppConfig {
   try {
@@ -24,7 +24,6 @@ function readConfig(): AppConfig {
       fullscreen: typeof saved?.fullscreen === "boolean"
         ? saved.fullscreen
         : localStorage.getItem(fullscreenStorageKey) === "true",
-      orientation: saved?.orientation === "portrait" || saved?.orientation === "landscape" ? saved.orientation : defaultConfig.orientation,
       hudVisible: typeof saved?.hudVisible === "boolean" ? saved.hudVisible : defaultConfig.hudVisible,
     };
   } catch {
@@ -46,16 +45,9 @@ function GitHubMark() {
 
 export function App({ layout = defaultLayout, content = null, contentPresentation = null, gutters = {} }: { layout?: Layout; content?: ReactNode; contentPresentation?: ContentPresentation | null; gutters?: Gutters }) {
   const [config, setConfig] = useState(readConfig);
-  const { orientation: orientationOverride, hudVisible } = config;
-  const setOrientationOverride = (orientation: AppConfig["orientation"]) => setConfig((current) => ({ ...current, orientation }));
+  const { hudVisible } = config;
   const setHudVisible = (hudVisible: boolean) => setConfig((current) => ({ ...current, hudVisible }));
-  const landscape = (orientationOverride ?? layout.orientation) === "landscape";
-  const portrait = !landscape;
-  const activeLayout = orientationOverride === null ? layout : {
-    ...layout,
-    orientation: orientationOverride,
-    ...aspectRatioPresets[orientationOverride],
-  };
+  const activeLayout = layout;
   const fullscreenPreferred = config.fullscreen;
   const [viewportPixels, setViewportPixels] = useState({ width: 0, height: 0 });
   const [windowPixels, setWindowPixels] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -88,7 +80,6 @@ export function App({ layout = defaultLayout, content = null, contentPresentatio
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
       const key = event.key.toLowerCase();
       if (key === "f") toggleFullscreen();
-      if (key === "p") setConfig((current) => ({ ...current, orientation: current.orientation === "portrait" ? "landscape" : "portrait" }));
       if (key === "h") setConfig((current) => ({ ...current, hudVisible: !current.hudVisible }));
       if (key === "t") resetLocalStorage();
       if (key === "c") setActiveDialog((dialog) => dialog === "config" ? null : "config");
@@ -156,7 +147,7 @@ export function App({ layout = defaultLayout, content = null, contentPresentatio
           openSettings={openContentSettings}
         />}
         {hudVisible && <Corner position="top_left">
-          <div id="project_title" className="corner-body">GitHub Repository Template</div>
+          <div id="project_title" className="corner-body">Cat Hangout</div>
         </Corner>}
         {hudVisible && <Corner position="top_right">
           <a className="corner-body" href={repositoryUrl} target="_blank" rel="noopener noreferrer" aria-label="View the repository on GitHub" tabIndex={-1}>
@@ -167,7 +158,6 @@ export function App({ layout = defaultLayout, content = null, contentPresentatio
           <section id="config" aria-labelledby="config_title">
             <div id="config_title" className="corner-title">(C) Config</div>
             <label className="corner-body corner_option"><span>(F) Fullscreen</span><input id="fullscreen_toggle" type="checkbox" checked={fullscreenPreferred} onChange={toggleFullscreen} /></label>
-            <label className="corner-body corner_option"><span>(P) Portrait</span><input id="portrait_checkbox" type="checkbox" checked={portrait} onChange={(event) => setOrientationOverride(event.target.checked ? "portrait" : "landscape")} /></label>
             <label className="corner-body corner_option"><span>(H) HUD</span><input id="hud_checkbox" type="checkbox" checked={hudVisible} onChange={(event) => setHudVisible(event.target.checked)} /></label>
             <button className="corner-body corner_option" type="button" onClick={resetLocalStorage}>(T) Reset Local Storage</button>
           </section>
@@ -189,7 +179,6 @@ export function App({ layout = defaultLayout, content = null, contentPresentatio
         >
           {contentSettingsOpen && Settings ? <Settings /> : activeDialog === "config" ? <div className="dialog_options">
             <label className="dialog_option"><span>(F) Fullscreen</span><input type="checkbox" checked={fullscreenPreferred} onChange={toggleFullscreen} /></label>
-            <label className="dialog_option"><span>(P) Portrait</span><input type="checkbox" checked={portrait} onChange={(event) => setOrientationOverride(event.target.checked ? "portrait" : "landscape")} /></label>
             <label className="dialog_option"><span>(H) HUD</span><input type="checkbox" checked={hudVisible} onChange={(event) => setHudVisible(event.target.checked)} /></label>
             <button type="button" onClick={resetLocalStorage}>(T) Reset Local Storage</button>
           </div> : <div className="dialog_options">

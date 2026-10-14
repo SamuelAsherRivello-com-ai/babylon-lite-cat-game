@@ -28,6 +28,7 @@ import { BabylonLiteAIEntry, BabylonLiteMode } from "./babylon/pixel-grid-entry.
 import { createRenderTargetSurfaceView, getRenderResolutionDimensions } from "./babylon/render-resolution.ts";
 import { useContentShell } from "../shared/content-shell-context.tsx";
 import { useBabylonPresentation } from "./babylon/babylon-presentation.tsx";
+import { CatHangout } from "../game/cat-hangout.tsx";
 
 // Lite 1.32 exposes this runtime limit through an internal device field omitted
 // from its public declaration. Keep that pinned boundary assertion in one place.
@@ -364,5 +365,5 @@ export function Content() {
     return <div className="babylon_content babylon_content_message" role="status">Select Babylon Lite with 2D content or add the renderer-specific integration described in the guide.</div>;
   }
 
-  return <PixelPerfectShowcase />;
+  return <><PixelPerfectShowcase /><CatHangout /></>;
 }

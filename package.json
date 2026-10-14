@@ -1,12 +1,12 @@
 {
-  "name": "github-repository-template",
-  "private": true,
+  "name": "babylon-lite-cat-game",
+  "private": false,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "npm run check:typescript-source && npm run typecheck && npm test && vite build",
     "preview": "vite preview",
-    "test": "node --import tsx --test --test-isolation=none project-name/test/page.test.ts project-name/test/content.test.ts",
+    "test": "node --import tsx --test --test-isolation=none cat-hangout/test/*.test.ts",
     "typecheck": "tsc -p tsconfig.app.json && tsc -p tsconfig.node.json",
     "check:typescript-source": "tsx scripts/check-typescript-source.ts"
   },

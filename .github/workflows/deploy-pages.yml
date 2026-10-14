@@ -42,7 +42,7 @@ jobs:
       - name: Prepare demo artifact
         run: |
           mkdir -p _site
-          cp -R project-name/dist/. _site/
+          cp -R cat-hangout/dist/. _site/
           cp version.txt _site/version.txt
       - name: Upload demo
         uses: actions/upload-pages-artifact@v3

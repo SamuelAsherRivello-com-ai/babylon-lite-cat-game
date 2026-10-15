@@ -24,10 +24,10 @@
 
 - [x] 4.1 Integrate the released shared client with local prediction, reconciliation, remote interpolation, and camera tracking; verify deterministic client rule and interpolation tests pass.
 - [x] 4.2 Implement join, full, disconnect, expired-room, and retry behavior without offline substitution; verify simulated connection-loss and reconnect tests pass.
-- [ ] 4.3 Test two independent clients under simulated latency and jitter; verify responsive local movement, smooth remote motion, stable bot population, and consistent interactions.
+- [x] 4.3 Test two independent clients under simulated latency and jitter; verify responsive local movement, smooth remote motion, stable bot population, and consistent interactions.
 
 ## 5. Delivery and release
 
 - [ ] 5.1 Update README and project documentation with controls, asset provenance, player limits, recovery limits, setup, and the original prompt; verify every documented command and link.
 - [x] 5.2 Run source coverage, strict typecheck, tests, production build, and the required triage analysis; verify all commands pass and record results.
-- [ ] 5.3 Publish the verified public GitHub Pages game, verify its production path with the deployed backend, and capture representative browser evidence.
+- [x] 5.3 Publish the verified public GitHub Pages game, verify its production path with the deployed backend, and capture representative browser evidence.

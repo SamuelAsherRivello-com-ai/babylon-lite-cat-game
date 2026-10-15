@@ -35,3 +35,13 @@ the server's `GET /api/health` endpoint returned HTTP 200, version `0.9.17`,
 and the `cat-hangout` registration after the staged Cat Hangout check, stable
 two-client relay check, Combat check, and sustained-session release probe all
 completed successfully.
+
+## Public browser evidence
+
+On 2026-10-15 UTC, two isolated Microsoft Edge clients loaded the public
+GitHub Pages URL into the same room. The roster showed two human cats plus two
+bots (four total). One client ran a deterministic 60/140/220 ms latency cycle;
+both clients accepted keyboard movement and echoed each human's Space action as
+the same `social` activity while retaining the four-cat roster. Both pages
+reported 120 FPS and zero console errors. Chromium reported only its known
+Windows WebGPU warning that `powerPreference` is ignored.

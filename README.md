@@ -90,6 +90,18 @@ Install dependencies, then start the Vite development server from the repository
 <!-- AI: Update these project details when the template is used. -->
 The browser client joins the public `cat-hangout` Colyseus room immediately, renders a landscape pixel-art hangout, and keeps bots server-authoritative while fewer than four humans are present.
 
+### How to play
+
+- Move with **WASD**, the **Arrow keys**, or the on-screen joystick.
+- Press **Space** or tap **Act** to interact with nearby hangout activities.
+- There is no score, victory, or defeat state: cats can wander, rest, play, and socialize.
+- One shared room accepts up to 12 human visitors. When fewer than four humans are present, the server adds only enough bot cats to reach four total cats (at most three bots). At four or more humans, no bots are added.
+- The game never creates an offline fallback room. If the connection interrupts, use **Retry**; the retained roster stays visible while the shared client reconnects. A full or expired room remains an explicit server result.
+
+### Multiplayer setup
+
+The client connects automatically to `https://rmc-colyseus-multiplayer-server.vercel.app`. For a local or staging server, set `VITE_RMC_SERVER_URL` before running `npm run dev`. The server remains authoritative for admission, bot population, movement bounds, activities, and all roster snapshots.
+
 ### 🤖 AI
 
 <!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
@@ -104,7 +116,7 @@ The browser client joins the public `cat-hangout` Colyseus room immediately, ren
 - [Deep Dive Overview](docs/deep-dive-overview.md) summarizes the project's
   technical details for developers, including its shared-room and prediction model.
 - [Tiled map guide](docs/tiled-map.md) explains the editable world, collision,
-  and activity-object contract.
+  activity-object contract, external TSX tilesets, and animated tile frames.
 - [Asset provenance](docs/asset-provenance.md) records the CatMega source
   material and its current licensing evidence.
 

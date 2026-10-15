@@ -29,6 +29,7 @@ export type CatHangoutConnection = Readonly<{
 type Listener = (connection: CatHangoutConnection) => void;
 type CatActions = Readonly<{ move: Readonly<{ x: number; z: number }>; interact: undefined; snapshot: undefined }>;
 type SharedState = MultiplayerState<unknown, unknown, unknown, unknown> & Readonly<{ cats?: readonly ServerCat[] }>;
+type SharedClientFactory = (endpoint: string) => MultiplayerClient<unknown, CatActions>;
 
 const DEFAULT_ENDPOINT = "https://rmc-colyseus-multiplayer-server.vercel.app";
 
@@ -40,17 +41,19 @@ function endpointFromEnvironment() {
 export class CatHangoutClient {
   readonly endpoint: string;
   private shared: MultiplayerClient<unknown, CatActions> | undefined;
-  private roomId: string | null = null;
   private listeners = new Set<Listener>();
   private state: CatHangoutConnection = { status: "connecting", snapshot: null, sessionId: null, error: "" };
 
-  constructor(endpoint = endpointFromEnvironment()) { this.endpoint = endpoint; }
+  constructor(
+    endpoint = endpointFromEnvironment(),
+    private readonly createSharedClient: SharedClientFactory = (url) => new MultiplayerClient<unknown, CatActions>(url, "cat-hangout"),
+  ) { this.endpoint = endpoint; }
 
   subscribe(listener: Listener) { this.listeners.add(listener); listener(this.state); return () => this.listeners.delete(listener); }
 
   connect() {
     if (this.shared) { void this.shared.connect(); return; }
-    const shared = new MultiplayerClient<unknown, CatActions>(this.endpoint, "cat-hangout");
+    const shared = this.createSharedClient(this.endpoint);
     this.shared = shared;
     shared.subscribe((state) => this.receiveShared(shared, state as SharedState));
     void shared.connect();
@@ -65,7 +68,7 @@ export class CatHangoutClient {
   interact() { if (this.state.status === "connected") this.shared?.send("interact"); }
 
   disconnect() {
-    this.shared?.disconnect(); this.shared = undefined; this.roomId = null;
+    this.shared?.disconnect(); this.shared = undefined;
   }
 
   private emit() { for (const listener of this.listeners) listener(this.state); }
@@ -74,10 +77,6 @@ export class CatHangoutClient {
 
   private receiveShared(shared: MultiplayerClient<unknown, CatActions>, state: SharedState) {
     if (shared !== this.shared) return;
-    if (state.status === "connected" && shared.room && this.roomId !== shared.room.sessionId) {
-      this.roomId = shared.room.sessionId;
-      shared.room.onMessage("catState", (snapshot: CatHangoutSnapshot) => this.setState({ status: "connected", snapshot, sessionId: shared.state.sessionId, error: "" }));
-    }
     const snapshot = state.cats ? { capacity: state.capacity, players: state.players as ServerCat[], cats: state.cats } : this.state.snapshot;
     const status = state.status === "ended" ? "expired" : state.status === "offline" ? "disconnected" : state.status;
     this.setState({ status: status as CatHangoutConnection["status"], snapshot, sessionId: state.sessionId, error: state.error });

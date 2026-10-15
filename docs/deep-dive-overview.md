@@ -21,10 +21,17 @@ shipped-map test. Cat animation state is likewise explicit: humans select
 idles when no input is held, while bots choose wandering and activity states
 on the server.
 
+The world map uses an external Tiled TSX tileset and the runtime resolves it
+relative to the TMJ URL. Its typed loader validates the tilesheet grid and
+selects animated-tile frames from their declared durations. CatMega character
+tilesheets use the corresponding typed state/frame catalog, so furniture and
+cat animation both remain data-driven rather than relying on CSS timing alone.
+
 ## Verified multiplayer release
 
-The game uses the released `v0.9.15` shared multiplayer server at
-`https://rmc-colyseus-multiplayer-server.vercel.app`. On 2026-10-14 UTC,
-the server's `GET /api/health` endpoint returned HTTP 200, version `0.9.15`,
-and the `cat-hangout` game registration after its sustained-session release
-probe completed successfully.
+The game uses the released `v0.9.17` shared multiplayer server at
+`https://rmc-colyseus-multiplayer-server.vercel.app`. On 2026-10-15 UTC,
+the server's `GET /api/health` endpoint returned HTTP 200, version `0.9.17`,
+and the `cat-hangout` registration after the staged Cat Hangout check, stable
+two-client relay check, Combat check, and sustained-session release probe all
+completed successfully.
